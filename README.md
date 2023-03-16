@@ -41,4 +41,4 @@ Just create a Jenkins job with a call of this script and some required variables
 Here is a hardcoded folder name - **SharedImages**, and images that are used across documents should be placed here. Script will identify this condition while iterating through each document and image path will contain that folder's name.
 
 # Docs reusage
-Script iterates each document and if it finds a pattern *~SomeReusableText~* and there is a *SomeReusableText.md* document in the repository's root folder, autoreplacement will be done to produce a complete PDF document.
+Script iterates each document and if it finds a pattern ```~SomeReusableText~``` and there is a ```SomeReusableText.md``` document in the repository's root folder, autoreplacement will be done to produce a complete PDF document.
