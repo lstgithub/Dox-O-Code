@@ -18,15 +18,25 @@ This is an advanced PowerShell script for building custom *documentation-as-a-co
 - Git repository with Markdown source files. Desired structure is:
 
 *Root* folder
+
     *SharedImages* folder
+
         *Image1.png*
+
     *SomeDocuments* folder
+
         *Doc1.md*
+
         *Image1Doc1.png*
+
     *SomeOtherDocuments* folder
+
         *Doc2.md*
+
         *Image2Doc2.png*
+
     *Reusable_Text_Part.md* file
+
     *Reusable_Text_Another_Part.md* file
 
 # Desired flow example
