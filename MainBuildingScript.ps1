@@ -1,5 +1,8 @@
+# Variables description for fast start is in the readme file
+
 # If any error occurs, execution of the script will be stopped
 $ErrorActionPreference = "Stop";
+
 # Payload for notifications. Variables can be freely adjusted
 $request_body = @"
 {
@@ -45,14 +48,17 @@ $request_body = @"
   ]
 }
 "@
+
 # Main executable files and libraries location
 $env:Path += ";$env:WORKSPACE\Root\Tools\Miktex\texmfs\install\miktex\bin\x64"
 $env:Path += ";$env:WORKSPACE\Root\Tools\Pandoc"
+
 # Here goes your remote shared drive authentication
 $secpasswd = ConvertTo-SecureString "$env:ACCOUNT" -AsPlainText -Force
 $mycreds = New-Object System.Management.Automation.PSCredential ("ACCOUNT", $secpasswd)
 Write-Host "Creating temporary mapped network drive"
 New-PSDrive -Name "Storage" -PSProvider "FileSystem" -Root "PATH" -Credential $mycreds
+
 # Cleaning temp folders from the previous launches
 Write-Host "Checking for temporary files"
 $PathTemp = Test-Path -Path "$env:WORKSPACE\tex2pdf*"
@@ -63,6 +69,7 @@ if ($PathTemp) {
 elseif (!$PathTemp) {
   Write-Host "No temporary files detected"
 }
+
 # To avoid redownloading tools each time, here is a check for their presence
 Write-Host "Checking for Pandoc and MikTeX"
 $PathTools = Test-Path -Path "$env:WORKSPACE\Root\Tools"
@@ -74,6 +81,8 @@ if (!$PathTools) {
 elseif ($PathTools) {
   Write-Host "Tools were found, proceeding"
 }
+
+# Temporary folder for further preprocessing
 $tempFolder = "TempFolder"
 $isExist = Test-Path -Path $env:WORKSPACE\$tempFolder
 if (!$isExist) {
@@ -84,6 +93,7 @@ else {
   Remove-Item -Recurse -Path "$env:WORKSPACE\$tempFolder"
   mkdir $env:WORKSPACE\$tempFolder
 }
+
 # Handler for reusable text parts
 # Parent document with a pattern ~Some_reused_text~
 # Will be replaced onto content of the Some_reused_text.md file in the repository root
@@ -93,12 +103,13 @@ try {
   $mainFiles = Get-ChildItem -Recurse -Path "$env:WORKSPACE\*$ext*\*$ext*.md"
   # Symbol to detect reusable text inside of the main documents
   $serviceSymbol = "~"
-  # A cycle to iterate through each document and collect all reusable parts
+  # A cycle to iterate through each document and collect all reusable parts if present
   foreach ($mainFile in $mainFiles) {
     $tempKeyWordList = Get-Content $mainFile | Select-String -Pattern "$serviceSymbol*$serviceSymbol"
     if ($tempKeyWordList.Count -gt 0) {
       $keyWords = $tempKeyWordList -Replace $serviceSymbol
       $content = Get-Content $mainFile
+
       # Replacement procedure
       foreach ($replacement in $keyWords) {
         $fullContent = Get-Content "$env:WORKSPACE\*$replacement*" -Raw
@@ -110,6 +121,7 @@ try {
       Set-Content -Path $env:WORKSPACE\$tempFolder\Full_$fileName -Value $content
       Set-Location $env:WORKSPACE\$tempFolder
     }
+
     # Fallback for documents, where no reusable parts are present
     else {
       Write-Host "Found MD without replacement parts"
@@ -117,7 +129,8 @@ try {
       Copy-Item *.md -Destination $env:WORKSPACE\$tempFolder
     }
   }
-  # Detecting temporary files, used in preprocessing
+
+  # Detecting temporary files, used in preprocessing for building full versions
   Set-Location $env:WORKSPACE\$tempFolder
   $prePreFilesToBeRemoved = Get-ChildItem -Recurse -Include "Full_*"
   if ($prePreFilesToBeRemoved.Count -gt 0) {
@@ -130,6 +143,7 @@ try {
     # Deleting previously collected files
     Remove-Item * -Include $filesToBeRemoved
   }
+
   # Handler for images from relative and friendly to absolute for Pandoc
   # ![**Image description**](./Folder/Image.png) - source
   # ![**Image description**](D:\Folder\Folder\Image.png) - after handling
@@ -154,9 +168,11 @@ try {
     $fileName = [System.IO.Path]::GetFileName($file)
     Set-Content -Path ".\$fileName" -Value $newContent
   }
+
   # A command to Pandoc to convert all MD files in the directory to PDF ones after all preprocessing stages for final documents versions
   Get-ChildItem -r -i *.md | ForEach-Object { $pdf = $_.directoryname + "\" + $_.basename + ".pdf"; pandoc $_.name --pdf-engine=xelatex -o $pdf }
 }
+
 catch {
   # Notification about building process failure
   Write-Host $_
@@ -167,6 +183,7 @@ catch {
   Invoke-RestMethod -Uri "WEB_HOOK_ADDRESS" -Method POST -Body $request_body
   exit 1
 }
+
 # Example of custom path for uploading output PDF files, based on the variables from Jenkins job
 Write-Host "Documentation is ready"
 try {
@@ -180,8 +197,9 @@ try {
     Copy-Item *.pdf -Destination "PATH\$env:Extension"
   }
 }
+
+# Notification about failure of PDFs upload to shared drive
 catch {
-  # Notification about failure of PDFs upload to shared drive
   Write-Host $_
   $build_status = "Can\'t upload files"
   $status_color = "#f2ff00"
@@ -190,6 +208,7 @@ catch {
   Invoke-RestMethod -Uri "WEB_HOOK_ADDRESS" -Method POST -Body $request_body
   exit 1
 }
+
 # Successful build notification
 $build_status = "Build success"
 $status_color = "#1fc90c"

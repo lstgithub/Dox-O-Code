@@ -42,3 +42,14 @@ Here is a hardcoded folder name - **SharedImages**, and images that are used acr
 
 # Docs reusage
 Script iterates each document and if it finds a pattern ```~SomeReusableText~``` and there is a ```SomeReusableText.md``` document in the repository's root folder, autoreplacement will be done to produce a complete PDF document.
+
+# Script variables for fast start
+
+List of non-environment variables to be adjusted for usage:
+ACCOUNT - 
+PATH - 
+PATH_TO_TOOLS - 
+WEB_HOOK_ADDRESS - 
+PATH - 
+
+List of environment variables to be adjusted can be retrieved searching by wildcard "$env:"
