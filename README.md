@@ -17,27 +17,19 @@ This is an advanced PowerShell script for building custom *documentation-as-a-co
 - https://pandoc.org/ and https://miktex.org/;
 - Git repository with Markdown source files. Desired structure is:
 
-    *Root* folder
-
-        *SharedImages* folder
-
-            *Image1.png*
-
-        *SomeDocuments* folder
-
-            *Doc1.md*
-
-            *Image1Doc1.png*
-
-        *SomeOtherDocuments* folder
-
-            *Doc2.md*
-
-            *Image2Doc2.png*
-
-        *Reusable_Text_Part.md* file
-
-        *Reusable_Text_Another_Part.md* file
+```
+*Root* folder
+    *SharedImages* folder
+        *Image1.png*
+    *SomeDocuments* folder
+        *Doc1.md*
+        *Image1Doc1.png*
+    *SomeOtherDocuments* folder
+        *Doc2.md*
+        *Image2Doc2.png*
+    *Reusable_Text_Part.md* file
+    *Reusable_Text_Another_Part.md* file
+```
 
 # Desired flow example
 A user is working with MD document from the repository. After finish, he commits changes. This starts a triggered call of this script on the remote Jenkins node to produce a customized PDF file for further usage.
